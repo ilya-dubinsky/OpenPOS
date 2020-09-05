@@ -12,7 +12,7 @@ import javax.persistence.ManyToOne;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Entity
-public class Terminal {
+public class Terminal extends BaseDataObject {
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 	private Date activeFrom = new Date(); // TODO retrieve from a service?
 

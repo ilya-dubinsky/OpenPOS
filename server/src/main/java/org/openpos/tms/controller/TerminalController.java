@@ -6,8 +6,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import java.util.UUID;
 
 import org.openpos.tms.dao.AddressRepository;
+import org.openpos.tms.dao.CountryRepository;
 import org.openpos.tms.dao.TerminalRepository;
+import org.openpos.tms.dao.dataobject.Country;
 import org.openpos.tms.dao.dataobject.Terminal;
+import org.openpos.tms.errors.CountryNotFoundException;
 import org.openpos.tms.errors.TerminalNotFoundException;
 import org.openpos.tms.infra.PublicServiceMethod;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,10 +28,18 @@ public class TerminalController extends BaseController {
 
 	@Autowired
 	private AddressRepository addressRepository;
+	
+	@Autowired
+	private CountryRepository countryRepository;
 
 	@PostMapping("/terminals")
 	@PublicServiceMethod
 	public EntityModel<Terminal> createTerminalAction(@RequestBody(required = true) Terminal terminal) {
+//		addressRepository.
+//		String countryAlpha2 = terminal.getAddress().getCountry().getAlpha2();
+//		Country country = countryRepository.findById(countryAlpha2).orElseThrow(() -> new CountryNotFoundException(countryAlpha2)); 
+//		terminal.getAddress().setCountry(country);
+		
 		addressRepository.save(terminal.getAddress());
 
 		Terminal storedTerminal = terminalRepository.save(terminal);

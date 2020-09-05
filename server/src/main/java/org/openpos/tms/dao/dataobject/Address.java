@@ -3,15 +3,19 @@ package org.openpos.tms.dao.dataobject;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 @Entity
-public class Address {
+public class Address extends BaseDataObject {
 
-	private String country;
+	@OneToOne( optional = false)
+	private Country country;
+
 	private String city;
 	private String zip;
 	private String line1;
@@ -41,14 +45,14 @@ public class Address {
 	/**
 	 * @return the country
 	 */
-	public String getCountry() {
+	public Country getCountry() {
 		return country;
 	}
 
 	/**
 	 * @param country the country to set
 	 */
-	public void setCountry(String country) {
+	public void setCountry(Country country) {
 		this.country = country;
 	}
 
