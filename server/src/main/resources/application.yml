@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    hikari:
+      connectionTimeout:20000
+      maximumPoolSize:5
+    url: jdbc:postgresql://inethub:5432/openpos
+    username: openpos
+    password: terlala1
+  jpa:
+    hibernate:
+      ddl-auto: validate
+      default_schema: openpos
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: DEBUG
+      type:
+        descriptor:
+          sql:
+            BasicBinder: TRACE
+openpos:
+  crypto:
+    pk:
+      hash: SHA-256
