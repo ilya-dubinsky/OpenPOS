@@ -13,11 +13,9 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
 /**
  * @author idubinsky
@@ -31,11 +29,9 @@ import lombok.ToString;
  *         only.
  */
 @Entity
-@Getter
-@Setter
+@Data
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
-@ToString
 public class PublicKey extends BaseDataObject {
 	@Id
 	@GeneratedValue

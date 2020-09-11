@@ -2,19 +2,15 @@ package org.openpos.tms.dao.dataobject;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Table;
 
+import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
 @Entity
-@Table(name="country")
-@Getter @Setter 
+@Data
 @EqualsAndHashCode(callSuper = false)
-@NoArgsConstructor @ToString
+@NoArgsConstructor 
 public class Country extends BaseDataObject {
 
 	@Id

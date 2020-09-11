@@ -1,22 +1,30 @@
 package org.openpos.tms.controller;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
+import org.openpos.tms.dao.AccountRepository;
 import org.openpos.tms.dao.AddressRepository;
+import org.openpos.tms.dao.CountryRepository;
 import org.openpos.tms.dao.OperationRepository;
 import org.openpos.tms.dao.TerminalRepository;
+import org.openpos.tms.dao.dataobject.Account;
+import org.openpos.tms.dao.dataobject.Address;
+import org.openpos.tms.dao.dataobject.Country;
 import org.openpos.tms.dao.dataobject.Operation;
 import org.openpos.tms.dao.dataobject.Terminal;
+import org.openpos.tms.errors.AccountNotFoundException;
+import org.openpos.tms.errors.CountryNotFoundException;
 import org.openpos.tms.errors.OperationNotFoundException;
 import org.openpos.tms.errors.TerminalNotFoundException;
 import org.openpos.tms.infra.PublicServiceMethod;
+import org.openpos.tms.model.TerminalModel;
+import org.openpos.tms.model.TerminalModelAssembler;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.EntityModel;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,80 +42,88 @@ public class TerminalController extends BaseController {
 	private TerminalRepository terminalRepository;
 
 	@Autowired
-	private AddressRepository addressRepository;
+	CountryRepository countryRepository;
 
 	@Autowired
 	private OperationRepository operationRepository;
 
-	@PostMapping("/terminals")
+	@Autowired
+	private AccountRepository accountRepository;
+	
+	@Autowired
+	private AddressRepository addressRepository;
+
+	@Autowired
+	private TerminalModelAssembler terminalModelAssembler;
+
+	@Autowired
+	private PagedResourcesAssembler<Terminal> pagedTerminalResourcesAssembler;
+
+	@PostMapping("/accounts/{accountId}/terminals")
 	@PublicServiceMethod
-	public EntityModel<Terminal> createTerminalAction(@RequestBody(required = true) Terminal terminal) {
-		addressRepository.save(terminal.getAddress());
+	public ResponseEntity<TerminalModel> createTerminalAction(@PathVariable long accountId,
+			@RequestBody(required = true) TerminalModel terminalModel) {
+		Account account = accountRepository.findById(accountId)
+				.orElseThrow(() -> new AccountNotFoundException(accountId));
+
+		Terminal terminal = new Terminal();
+		BeanUtils.copyProperties(terminalModel, terminal);
+		terminal.setAccount(account);
+
+		Country country = countryRepository.findById(terminalModel.getCountry()).orElseThrow(() -> new CountryNotFoundException(terminalModel.getCountry()));
+		Address address = new Address();
+		
+		address.setCountry(country);
+		BeanUtils.copyProperties(terminalModel, address);
+		terminal.setAddress(address);
+		address = addressRepository.save(address);
 
 		Terminal storedTerminal = terminalRepository.save(terminal);
-		return getModel(storedTerminal);
+		return new ResponseEntity<>(terminalModelAssembler.toModel(storedTerminal), HttpStatus.OK);
 	}
 
-	@GetMapping("/terminals/{id}")
+	@GetMapping("/accounts/{accountId}/terminals")
 	@PublicServiceMethod
-	public EntityModel<Terminal> getTerminalAction(@PathVariable UUID id) {
-		Terminal terminal = terminalRepository.findById(id).orElseThrow(() -> new TerminalNotFoundException(id));
-		return getModel(terminal);
+	public ResponseEntity<PagedModel<TerminalModel>> getTerminals(@PathVariable long accountId, Pageable pageable) {
+
+		// discarding the result of the search
+		accountRepository.findById(accountId).orElseThrow(() -> new AccountNotFoundException(accountId));
+
+		Page<Terminal> terminals = terminalRepository.findByAccountId(pageable, accountId);
+		PagedModel<TerminalModel> coll = pagedTerminalResourcesAssembler.toModel(terminals, terminalModelAssembler);
+		return new ResponseEntity<>(coll, HttpStatus.OK);
 	}
 
-	@GetMapping("/terminals/{id}/operations")
+	@GetMapping("/accounts/{accountId}/terminals/{terminalId}")
 	@PublicServiceMethod
-	public List<EntityModel<Operation>> getTerminalOperationsAction(@PathVariable UUID id) {
-		Terminal terminal = terminalRepository.findById(id).orElseThrow(() -> new TerminalNotFoundException(id));
+	public ResponseEntity<TerminalModel> getTerminal(@PathVariable long accountId, @PathVariable long terminalId) {
+		accountRepository.findById(accountId).orElseThrow(() -> new AccountNotFoundException(accountId));
 
-		List<EntityModel<Operation>> ops = terminal.getOperations().stream().map(x -> this.getModel(terminal, x))
-				.collect(Collectors.toList());
-
-		return ops;
+		Terminal terminal = terminalRepository.findById(terminalId).orElseThrow(() -> new TerminalNotFoundException(terminalId));
+		return new ResponseEntity<>(terminalModelAssembler.toModel(terminal), HttpStatus.OK);
 	}
 
-	@PostMapping("/terminals/{id}/operations/{type}")
+	@PostMapping("/accounts/{accountId}/terminals/{terminalId}/operations/{type}")
 	@PublicServiceMethod
-	public EntityModel<Operation> addTerminalOperationAction(@PathVariable UUID id, @PathVariable String type) {
-		Terminal terminal = terminalRepository.findById(id).orElseThrow(() -> new TerminalNotFoundException(id));
+	public ResponseEntity<TerminalModel> addTerminalOperationAction(@PathVariable long accountId, @PathVariable long terminalId, @PathVariable String type) {
+		accountRepository.findById(accountId).orElseThrow(() -> new AccountNotFoundException(accountId));
+		Terminal terminal = terminalRepository.findById(terminalId).orElseThrow(() -> new TerminalNotFoundException(terminalId));
 		Operation op = operationRepository.findByType(type).orElseThrow(() -> new OperationNotFoundException(type));
-		LOGGER.info("Adding operation {} to terminal {}", op.getType(), terminal.getTerminalId());
 		terminal.addOperation(op);
 		terminalRepository.save(terminal);
-		return getModel(terminal, op);
+		LOGGER.info("Adding operation {} to terminal {}", op.getType(), terminal.getTerminalId());
+		return new ResponseEntity<>(terminalModelAssembler.toModel(terminal), HttpStatus.OK);
 	}
 
-	@DeleteMapping("/terminals/{id}/operations/{type}")
+	@DeleteMapping("/accounts/{accountId}/terminals/{terminalId}/operations/{type}")
 	@PublicServiceMethod
-	public void delTerminalOperationAction(@PathVariable UUID id, @PathVariable String type) {
-		Terminal terminal = terminalRepository.findById(id).orElseThrow(() -> new TerminalNotFoundException(id));
+	public void delTerminalOperationAction(@PathVariable long accountId, @PathVariable long terminalId, @PathVariable String type) {
+		accountRepository.findById(accountId).orElseThrow(() -> new AccountNotFoundException(accountId));
+		Terminal terminal = terminalRepository.findById(terminalId).orElseThrow(() -> new TerminalNotFoundException(terminalId));
 		Operation op = operationRepository.findByType(type).orElseThrow(() -> new OperationNotFoundException(type));
-		LOGGER.info("Removing operation {} from terminal {}", op.getType(), terminal.getTerminalId());
 		terminal.removeOperation(op);
 		terminalRepository.save(terminal);
-	}
-
-	@GetMapping("/terminals/{id}/operations/{type}")
-	@PublicServiceMethod
-	public EntityModel<Operation> getOperationByTypeAction(@PathVariable UUID id, @PathVariable String type) {
-		Terminal terminal = terminalRepository.findById(id).orElseThrow(() -> new TerminalNotFoundException(id));
-		Operation op = operationRepository.findByType(type).orElseThrow(() -> new OperationNotFoundException(type));
-		return getModel(terminal, op);
-	}
-
-	private EntityModel<Terminal> getModel(Terminal terminal) {
-		return EntityModel.of(terminal,
-				linkTo(methodOn(TerminalController.class).getTerminalAction(terminal.getTerminalId())).withSelfRel(),
-				linkTo(methodOn(TerminalController.class).getTerminalOperationsAction(terminal.getTerminalId()))
-						.withRel("operations"));
-	}
-
-	private EntityModel<Operation> getModel(Terminal terminal, Operation operation) {
-		return EntityModel.of(operation,
-				linkTo(methodOn(TerminalController.class).getOperationByTypeAction(terminal.getTerminalId(),
-						operation.getType())).withSelfRel(),
-				linkTo(methodOn(TerminalController.class).getTerminalAction(terminal.getTerminalId()))
-						.withRel("parent"));
+		LOGGER.info("Removing operation {} from terminal {}", op.getType(), terminal.getTerminalId());
 	}
 
 }

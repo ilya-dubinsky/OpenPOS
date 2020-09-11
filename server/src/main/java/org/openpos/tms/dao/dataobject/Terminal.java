@@ -1,9 +1,8 @@
 package org.openpos.tms.dao.dataobject;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-import java.util.UUID;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -18,17 +17,15 @@ import javax.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.AccessLevel;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 @Entity
 @Table(name = "terminal")
-@Getter
-@Setter
+@Data
 @EqualsAndHashCode(callSuper = false)
-@ToString
 public class Terminal extends BaseDataObject {
 
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -41,26 +38,28 @@ public class Terminal extends BaseDataObject {
 	@JoinColumn(name = "address_id")
 	private Address address;
 
-	// TODO redo this so that it doesn't always delete all operations
 	@ManyToMany(cascade = CascadeType.MERGE)
 	@JoinTable(name = "ops_terminals", joinColumns = @JoinColumn(name = "terminal_id"),
 			inverseJoinColumns = @JoinColumn(name = "op_id"))
 	@Setter(AccessLevel.NONE)
-	private Collection<Operation> operations = new ArrayList<>();
+	private Set<Operation> operations = new HashSet<>();
 	
 	@ManyToOne
 	@JoinColumn(name= "active_key_id")
 	private PublicKey publicKey;
+	
+	@ManyToOne
+	private Account account;
 
 	@Getter(AccessLevel.NONE)
 	@Setter(AccessLevel.NONE)
-	private @Id @GeneratedValue UUID id;
+	private @Id @GeneratedValue long id;
 
-	public UUID getTerminalId() {
+	public long getTerminalId() {
 		return id;
 	}
 
-	public void setTerminalId(UUID uuid) {
+	public void setTerminalId(long uuid) {
 		this.id = uuid;
 	}
 
