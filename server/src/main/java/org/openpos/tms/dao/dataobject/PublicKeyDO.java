@@ -32,7 +32,7 @@ import lombok.NoArgsConstructor;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
-public class PublicKey extends BaseDataObject {
+public class PublicKeyDO extends BaseDO {
 	@Id
 	@GeneratedValue
 	private long id;

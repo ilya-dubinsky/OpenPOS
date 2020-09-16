@@ -5,11 +5,11 @@ import org.openpos.tms.dao.AddressRepository;
 import org.openpos.tms.dao.CountryRepository;
 import org.openpos.tms.dao.OperationRepository;
 import org.openpos.tms.dao.TerminalRepository;
-import org.openpos.tms.dao.dataobject.Account;
-import org.openpos.tms.dao.dataobject.Address;
-import org.openpos.tms.dao.dataobject.Country;
-import org.openpos.tms.dao.dataobject.Operation;
-import org.openpos.tms.dao.dataobject.Terminal;
+import org.openpos.tms.dao.dataobject.AccountDO;
+import org.openpos.tms.dao.dataobject.AddressDO;
+import org.openpos.tms.dao.dataobject.CountryDO;
+import org.openpos.tms.dao.dataobject.OperationDO;
+import org.openpos.tms.dao.dataobject.TerminalDO;
 import org.openpos.tms.errors.AccountNotFoundException;
 import org.openpos.tms.errors.CountryNotFoundException;
 import org.openpos.tms.errors.OperationNotFoundException;
@@ -57,28 +57,28 @@ public class TerminalController extends BaseController {
 	private TerminalModelAssembler terminalModelAssembler;
 
 	@Autowired
-	private PagedResourcesAssembler<Terminal> pagedTerminalResourcesAssembler;
+	private PagedResourcesAssembler<TerminalDO> pagedTerminalResourcesAssembler;
 
 	@PostMapping("/api/accounts/{accountId}/terminals")
 	@PublicServiceMethod
 	public ResponseEntity<TerminalModel> createTerminalAction(@PathVariable long accountId,
 			@RequestBody(required = true) TerminalModel terminalModel) {
-		Account account = accountRepository.findById(accountId)
+		AccountDO accountDO = accountRepository.findById(accountId)
 				.orElseThrow(() -> new AccountNotFoundException(accountId));
 
-		Terminal terminal = new Terminal();
-		BeanUtils.copyProperties(terminalModel, terminal);
-		terminal.setAccount(account);
+		TerminalDO terminalDO = new TerminalDO();
+		BeanUtils.copyProperties(terminalModel, terminalDO);
+		terminalDO.setAccount(accountDO);
 
-		Country country = countryRepository.findById(terminalModel.getCountry()).orElseThrow(() -> new CountryNotFoundException(terminalModel.getCountry()));
-		Address address = new Address();
+		CountryDO countryDO = countryRepository.findById(terminalModel.getCountry()).orElseThrow(() -> new CountryNotFoundException(terminalModel.getCountry()));
+		AddressDO addressDO = new AddressDO();
 		
-		address.setCountry(country);
-		BeanUtils.copyProperties(terminalModel, address);
-		terminal.setAddress(address);
-		address = addressRepository.save(address);
+		addressDO.setCountry(countryDO);
+		BeanUtils.copyProperties(terminalModel, addressDO);
+		terminalDO.setAddress(addressDO);
+		addressDO = addressRepository.save(addressDO);
 
-		Terminal storedTerminal = terminalRepository.save(terminal);
+		TerminalDO storedTerminal = terminalRepository.save(terminalDO);
 		return new ResponseEntity<>(terminalModelAssembler.toModel(storedTerminal), HttpStatus.OK);
 	}
 
@@ -89,8 +89,8 @@ public class TerminalController extends BaseController {
 		// discarding the result of the search
 		accountRepository.findById(accountId).orElseThrow(() -> new AccountNotFoundException(accountId));
 
-		Page<Terminal> terminals = terminalRepository.findByAccountId(pageable, accountId);
-		PagedModel<TerminalModel> coll = pagedTerminalResourcesAssembler.toModel(terminals, terminalModelAssembler);
+		Page<TerminalDO> terminalDOs = terminalRepository.findByAccountId(pageable, accountId);
+		PagedModel<TerminalModel> coll = pagedTerminalResourcesAssembler.toModel(terminalDOs, terminalModelAssembler);
 		return new ResponseEntity<>(coll, HttpStatus.OK);
 	}
 
@@ -99,31 +99,31 @@ public class TerminalController extends BaseController {
 	public ResponseEntity<TerminalModel> getTerminal(@PathVariable long accountId, @PathVariable long terminalId) {
 		accountRepository.findById(accountId).orElseThrow(() -> new AccountNotFoundException(accountId));
 
-		Terminal terminal = terminalRepository.findById(terminalId).orElseThrow(() -> new TerminalNotFoundException(terminalId));
-		return new ResponseEntity<>(terminalModelAssembler.toModel(terminal), HttpStatus.OK);
+		TerminalDO terminalDO = terminalRepository.findById(terminalId).orElseThrow(() -> new TerminalNotFoundException(terminalId));
+		return new ResponseEntity<>(terminalModelAssembler.toModel(terminalDO), HttpStatus.OK);
 	}
 
 	@PostMapping("/api/accounts/{accountId}/terminals/{terminalId}/operations/{type}")
 	@PublicServiceMethod
 	public ResponseEntity<TerminalModel> addTerminalOperationAction(@PathVariable long accountId, @PathVariable long terminalId, @PathVariable String type) {
 		accountRepository.findById(accountId).orElseThrow(() -> new AccountNotFoundException(accountId));
-		Terminal terminal = terminalRepository.findById(terminalId).orElseThrow(() -> new TerminalNotFoundException(terminalId));
-		Operation op = operationRepository.findByType(type).orElseThrow(() -> new OperationNotFoundException(type));
-		terminal.addOperation(op);
-		terminalRepository.save(terminal);
-		LOGGER.info("Adding operation {} to terminal {}", op.getType(), terminal.getTerminalId());
-		return new ResponseEntity<>(terminalModelAssembler.toModel(terminal), HttpStatus.OK);
+		TerminalDO terminalDO = terminalRepository.findById(terminalId).orElseThrow(() -> new TerminalNotFoundException(terminalId));
+		OperationDO op = operationRepository.findByType(type).orElseThrow(() -> new OperationNotFoundException(type));
+		terminalDO.addOperation(op);
+		terminalRepository.save(terminalDO);
+		LOGGER.info("Adding operation {} to terminal {}", op.getType(), terminalDO.getTerminalId());
+		return new ResponseEntity<>(terminalModelAssembler.toModel(terminalDO), HttpStatus.OK);
 	}
 
 	@DeleteMapping("/api/accounts/{accountId}/terminals/{terminalId}/operations/{type}")
 	@PublicServiceMethod
 	public void delTerminalOperationAction(@PathVariable long accountId, @PathVariable long terminalId, @PathVariable String type) {
 		accountRepository.findById(accountId).orElseThrow(() -> new AccountNotFoundException(accountId));
-		Terminal terminal = terminalRepository.findById(terminalId).orElseThrow(() -> new TerminalNotFoundException(terminalId));
-		Operation op = operationRepository.findByType(type).orElseThrow(() -> new OperationNotFoundException(type));
-		terminal.removeOperation(op);
-		terminalRepository.save(terminal);
-		LOGGER.info("Removing operation {} from terminal {}", op.getType(), terminal.getTerminalId());
+		TerminalDO terminalDO = terminalRepository.findById(terminalId).orElseThrow(() -> new TerminalNotFoundException(terminalId));
+		OperationDO op = operationRepository.findByType(type).orElseThrow(() -> new OperationNotFoundException(type));
+		terminalDO.removeOperation(op);
+		terminalRepository.save(terminalDO);
+		LOGGER.info("Removing operation {} from terminal {}", op.getType(), terminalDO.getTerminalId());
 	}
 
 }

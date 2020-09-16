@@ -20,13 +20,13 @@ import lombok.NoArgsConstructor;
 @Entity
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
-public class Transaction extends BaseDataObject {
+public class TransactionDO extends BaseDO {
 	@Id @GeneratedValue
 	private long id;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name = "terminal_id")
-	private Terminal terminal;
+	private TerminalDO terminal;
 	
 	private BigDecimal amount;
 	
@@ -34,10 +34,10 @@ public class Transaction extends BaseDataObject {
 	
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name="currency", referencedColumnName = "alpha3")
-	private Currency currency;
+	private CurrencyDO currency;
 	
 	@OneToMany
 	@JoinColumn(name = "transaction_id")
-	private List<Message> messages = new ArrayList<>();
+	private List<MessageDO> messages = new ArrayList<>();
 	
 }

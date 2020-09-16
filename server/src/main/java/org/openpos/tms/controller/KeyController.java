@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.openpos.tms.dao.PublicKeyRepository;
-import org.openpos.tms.dao.dataobject.PublicKey;
+import org.openpos.tms.dao.dataobject.PublicKeyDO;
 import org.openpos.tms.errors.PublicKeyNotFoundException;
 import org.openpos.tms.infra.crypto.PKUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,27 +28,27 @@ public class KeyController extends BaseController {
 	private PKUtils pkUtils;
 
 	@GetMapping("/publicKeys")
-	public List<EntityModel<PublicKey>> getPublicKeyListAction() {
+	public List<EntityModel<PublicKeyDO>> getPublicKeyListAction() {
 		return publicKeyRepository.findAll().stream().map(x->this.getModel(x)).collect(Collectors.toList());
 	}
 
 	@GetMapping("/publicKeys/{id}")
-	public EntityModel<PublicKey> getPublicKeyAction(@PathVariable long id) {
-		PublicKey key = publicKeyRepository.findById(id).orElseThrow(()->new PublicKeyNotFoundException(id));
+	public EntityModel<PublicKeyDO> getPublicKeyAction(@PathVariable long id) {
+		PublicKeyDO key = publicKeyRepository.findById(id).orElseThrow(()->new PublicKeyNotFoundException(id));
 		return getModel(key);
 	}
 	
 	@PostMapping("/publicKeys")
-	public EntityModel<PublicKey> addPublicKeyAction(@RequestBody PublicKey inputKey) {
-		PublicKey key = new PublicKey();
+	public EntityModel<PublicKeyDO> addPublicKeyAction(@RequestBody PublicKeyDO inputKey) {
+		PublicKeyDO key = new PublicKeyDO();
 		key.setKey(inputKey.getKey());
 		key.setExpiryDate(inputKey.getExpiryDate());
 		key.setFingerprint(pkUtils.getFingerprint(inputKey.getKey()));
-		PublicKey savedKey = publicKeyRepository.save(key);
+		PublicKeyDO savedKey = publicKeyRepository.save(key);
 		return getModel(savedKey);
 	}
 
-	private EntityModel<PublicKey> getModel(PublicKey key) {
+	private EntityModel<PublicKeyDO> getModel(PublicKeyDO key) {
 		return EntityModel.of(key, linkTo(methodOn(KeyController.class).getPublicKeyAction(key.getId())).withSelfRel());
 	}
 }

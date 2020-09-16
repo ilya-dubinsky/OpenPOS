@@ -1,6 +1,5 @@
 package org.openpos.tms.dao.dataobject;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -13,14 +12,21 @@ import lombok.EqualsAndHashCode;
 @Entity
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class Acquirer extends BaseDataObject {
-	@Id @GeneratedValue
+public class AddressDO extends BaseDO {
+
+	@OneToOne( optional = false)
+	@JoinColumn(name = "country_code", referencedColumnName = "alpha2")
+	private CountryDO country;
+
+	private String city;
+	private String zip;
+	private String line1;
+	private String line2;
+
+	@Id
+	@GeneratedValue
 	private long id;
+
 	
-	@Column(length = 128)
-	private String name;
-	
-	@OneToOne
-	@JoinColumn(name = "protocol_id")
-	private Protocol protocol;
+
 }

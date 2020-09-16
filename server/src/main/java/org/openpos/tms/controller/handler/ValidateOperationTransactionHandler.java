@@ -4,8 +4,8 @@ import java.util.Optional;
 
 import org.openpos.tms.dao.OperationRepository;
 import org.openpos.tms.dao.TerminalRepository;
-import org.openpos.tms.dao.dataobject.Operation;
-import org.openpos.tms.dao.dataobject.Terminal;
+import org.openpos.tms.dao.dataobject.OperationDO;
+import org.openpos.tms.dao.dataobject.TerminalDO;
 import org.openpos.tms.errors.TerminalNotFoundException;
 import org.openpos.tms.protocol.message.ErrorMessage;
 import org.openpos.tms.protocol.message.Message;
@@ -23,17 +23,17 @@ public class ValidateOperationTransactionHandler extends POSTransactionHandler {
 	protected TransactionHandlerResult handleTransaction(Message transaction) {
 		POSMessage message = (POSMessage) transaction;
 		String op = message.getOperation();
-		Optional<Operation> opSearch = operationRepository.findByType(op);
+		Optional<OperationDO> opSearch = operationRepository.findByType(op);
 		if (!opSearch.isPresent())
 			return error(ErrorMessage.validationError("Unknown operation %s", op));
 
 		long terminalId = message.getTerminalId();
-		Terminal terminal = terminalRepository.findById(terminalId)
+		TerminalDO terminalDO = terminalRepository.findById(terminalId)
 				// this is handled by a separate handler and shouldn't happen here
 				.orElseThrow(() -> new TerminalNotFoundException(terminalId));
 		
-		if (!terminal.getOperations().contains(opSearch.get()))
-			return error(ErrorMessage.validationError("Operation %s not allowed for terminal %d", op, terminalId));
+		if (!terminalDO.getOperations().contains(opSearch.get()))
+			return error(ErrorMessage.validationError("OperationDO %s not allowed for terminal %d", op, terminalId));
 		else
 			return next(transaction);
 			

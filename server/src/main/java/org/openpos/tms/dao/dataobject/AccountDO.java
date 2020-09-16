@@ -25,7 +25,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @RequiredArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class Account extends BaseDataObject {
+public class AccountDO extends BaseDO {
 
 	@Id
 	@GeneratedValue
@@ -41,12 +41,12 @@ public class Account extends BaseDataObject {
 	@Setter(AccessLevel.NONE)
 	@OneToMany
 	@JoinColumn(name = "account_id")
-	private final Set<Terminal> terminals = new HashSet<>();
+	private final Set<TerminalDO> terminals = new HashSet<>();
 
 	@Setter(AccessLevel.NONE)
 	@ManyToMany
 	@JoinTable(name = "accounts_acquirers", joinColumns = @JoinColumn(name = "account_id"),
 			inverseJoinColumns = @JoinColumn(name = "acquirer_id"))
-	private final Set<Acquirer> acquirers = new HashSet<>();
+	private final Set<AcquirerDO> acquirers = new HashSet<>();
 
 }

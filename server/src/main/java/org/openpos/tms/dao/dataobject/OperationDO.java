@@ -12,14 +12,14 @@ import lombok.NoArgsConstructor;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
-public class Operation extends BaseDataObject {
+public class OperationDO extends BaseDO {
 	@Id
 	@GeneratedValue
 	private long id;
 	private String type;
 	private String description;
 
-	public Operation(String type, String description) {
+	public OperationDO(String type, String description) {
 		this.type = type;
 		this.description = description;
 	}

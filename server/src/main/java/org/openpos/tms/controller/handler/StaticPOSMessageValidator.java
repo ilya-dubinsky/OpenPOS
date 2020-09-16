@@ -23,7 +23,7 @@ public class StaticPOSMessageValidator implements Validator {
 			errors.rejectValue("amount", "Amount empty");
 		
 		if (message.getCurrency() == null)
-			errors.rejectValue("currency", "Currency not provided");
+			errors.rejectValue("currency", "CurrencyDO not provided");
 	}
 
 }

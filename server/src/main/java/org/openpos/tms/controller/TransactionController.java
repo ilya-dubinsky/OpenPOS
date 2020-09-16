@@ -4,7 +4,7 @@ import org.openpos.tms.controller.handler.SourceHandler;
 import org.openpos.tms.controller.handler.TransactionHandlerResult;
 import org.openpos.tms.controller.handler.TransactionHandlerResult.ChainResult;
 import org.openpos.tms.dao.TransactionRepository;
-import org.openpos.tms.dao.dataobject.Transaction;
+import org.openpos.tms.dao.dataobject.TransactionDO;
 import org.openpos.tms.errors.TransactionNotFoundException;
 import org.openpos.tms.errors.TransactionProcessingException;
 import org.openpos.tms.model.POSMessageModel;
@@ -46,7 +46,7 @@ public class TransactionController {
 
 	@GetMapping("/api/transactions/{transactionId}")
 	public ResponseEntity<TransactionModel> getTransaction(@PathVariable long transactionId) {
-		Transaction tranDO = transactionRepository.findById(transactionId)
+		TransactionDO tranDO = transactionRepository.findById(transactionId)
 				.orElseThrow(() -> new TransactionNotFoundException(transactionId));
 		return new ResponseEntity<>(transactionModelAssembler.toModel(tranDO), HttpStatus.OK);
 	}

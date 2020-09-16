@@ -3,9 +3,9 @@ package org.openpos.tms.controller.handler;
 import org.openpos.tms.dao.CurrencyRepository;
 import org.openpos.tms.dao.TerminalRepository;
 import org.openpos.tms.dao.TransactionRepository;
-import org.openpos.tms.dao.dataobject.Currency;
-import org.openpos.tms.dao.dataobject.Terminal;
-import org.openpos.tms.dao.dataobject.Transaction;
+import org.openpos.tms.dao.dataobject.CurrencyDO;
+import org.openpos.tms.dao.dataobject.TerminalDO;
+import org.openpos.tms.dao.dataobject.TransactionDO;
 import org.openpos.tms.errors.CurrencyNotFoundException;
 import org.openpos.tms.errors.TerminalNotFoundException;
 import org.openpos.tms.protocol.message.Message;
@@ -27,17 +27,17 @@ public class PersistingTransactionHandler extends POSTransactionHandler {
 	protected TransactionHandlerResult handleTransaction(Message transaction) {
 		POSMessage posMessage = (POSMessage) transaction;
 
-		Transaction transactionDO = new Transaction();
+		TransactionDO transactionDO = new TransactionDO();
 		BeanUtils.copyProperties(posMessage, transactionDO, "currency");
 
-		Terminal terminal = terminalRepository.findById(posMessage.getTerminalId())
+		TerminalDO terminalDO = terminalRepository.findById(posMessage.getTerminalId())
 				.orElseThrow(() -> new TerminalNotFoundException(posMessage.getTerminalId()));
-		Currency currency = currencyRepository.findById(posMessage.getCurrency())
+		CurrencyDO currencyDO = currencyRepository.findById(posMessage.getCurrency())
 				.orElseThrow(() -> new CurrencyNotFoundException(posMessage.getCurrency()));
 		
 		transactionDO.setType(posMessage.getOperation());
-		transactionDO.setCurrency(currency);
-		transactionDO.setTerminal(terminal);
+		transactionDO.setCurrency(currencyDO);
+		transactionDO.setTerminal(terminalDO);
 		transactionDO = transactionRepository.save(transactionDO);
 		
 		long transactionId = transactionDO.getId();

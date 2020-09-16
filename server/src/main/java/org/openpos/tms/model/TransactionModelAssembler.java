@@ -4,20 +4,20 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import org.openpos.tms.controller.TransactionController;
-import org.openpos.tms.dao.dataobject.Transaction;
+import org.openpos.tms.dao.dataobject.TransactionDO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TransactionModelAssembler extends RepresentationModelAssemblerSupport<Transaction, TransactionModel> {
+public class TransactionModelAssembler extends RepresentationModelAssemblerSupport<TransactionDO, TransactionModel> {
 
 	public TransactionModelAssembler() {
 		super(TransactionController.class, TransactionModel.class);
 	}
 
 	@Override
-	public TransactionModel toModel(Transaction entity) {
+	public TransactionModel toModel(TransactionDO entity) {
 		TransactionModel model = instantiateModel(entity);
 		
 		BeanUtils.copyProperties(entity, model, "currency");

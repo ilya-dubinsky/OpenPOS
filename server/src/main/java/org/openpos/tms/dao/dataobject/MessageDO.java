@@ -14,20 +14,20 @@ import lombok.EqualsAndHashCode;
 @Data
 @Entity
 @EqualsAndHashCode(callSuper = false)
-public class Message extends BaseDataObject {
+public class MessageDO extends BaseDO {
 	private @Id @GeneratedValue long id;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "terminal_id")
-	private Terminal terminal;
+	private TerminalDO terminal;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "protocol_id")
-	private Protocol protocol;
+	private ProtocolDO protocol;
 	
 	@ManyToOne
 	@JoinColumn(name = "transaction_id")
-	private Transaction transaction;
+	private TransactionDO transaction;
 	
 	@Lob
 	private byte[] data;
