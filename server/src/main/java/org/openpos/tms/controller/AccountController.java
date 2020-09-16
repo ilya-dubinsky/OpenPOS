@@ -28,7 +28,7 @@ public class AccountController extends BaseController {
 	@Autowired
 	private PagedResourcesAssembler<Account> pagedResourcesAssembler;
 	
-	@GetMapping("/accounts/{id}")
+	@GetMapping("/api/accounts/{id}")
 	public ResponseEntity<AccountModel> getAccountById(@PathVariable Long id) {
 		return accountRepository.findById(id)
 				.map(accountModelAssembler::toModel)
@@ -36,14 +36,14 @@ public class AccountController extends BaseController {
 				.orElse(ResponseEntity.notFound().build());
 	}
 	
-	@GetMapping("/accounts")
+	@GetMapping("/api/accounts")
 	public ResponseEntity<PagedModel<AccountModel>> getAllAccounts(Pageable pageable) {
 		Page<Account> accountEntities = accountRepository.findAll(pageable);
 		PagedModel<AccountModel> collModel = pagedResourcesAssembler.toModel(accountEntities, accountModelAssembler);
 		return new ResponseEntity<>(collModel, HttpStatus.OK);
 	}
 	
-	@PostMapping("/accounts")
+	@PostMapping("/api/accounts")
 	public ResponseEntity<AccountModel> createAccount(@RequestBody AccountModel accountModel ) {
 		Account account = new Account(accountModel.getDisplayName(), accountModel.getContractNumber());
 		account = accountRepository.save(account);

@@ -59,7 +59,7 @@ public class TerminalController extends BaseController {
 	@Autowired
 	private PagedResourcesAssembler<Terminal> pagedTerminalResourcesAssembler;
 
-	@PostMapping("/accounts/{accountId}/terminals")
+	@PostMapping("/api/accounts/{accountId}/terminals")
 	@PublicServiceMethod
 	public ResponseEntity<TerminalModel> createTerminalAction(@PathVariable long accountId,
 			@RequestBody(required = true) TerminalModel terminalModel) {
@@ -82,7 +82,7 @@ public class TerminalController extends BaseController {
 		return new ResponseEntity<>(terminalModelAssembler.toModel(storedTerminal), HttpStatus.OK);
 	}
 
-	@GetMapping("/accounts/{accountId}/terminals")
+	@GetMapping("/api/accounts/{accountId}/terminals")
 	@PublicServiceMethod
 	public ResponseEntity<PagedModel<TerminalModel>> getTerminals(@PathVariable long accountId, Pageable pageable) {
 
@@ -94,7 +94,7 @@ public class TerminalController extends BaseController {
 		return new ResponseEntity<>(coll, HttpStatus.OK);
 	}
 
-	@GetMapping("/accounts/{accountId}/terminals/{terminalId}")
+	@GetMapping("/api/accounts/{accountId}/terminals/{terminalId}")
 	@PublicServiceMethod
 	public ResponseEntity<TerminalModel> getTerminal(@PathVariable long accountId, @PathVariable long terminalId) {
 		accountRepository.findById(accountId).orElseThrow(() -> new AccountNotFoundException(accountId));
@@ -103,7 +103,7 @@ public class TerminalController extends BaseController {
 		return new ResponseEntity<>(terminalModelAssembler.toModel(terminal), HttpStatus.OK);
 	}
 
-	@PostMapping("/accounts/{accountId}/terminals/{terminalId}/operations/{type}")
+	@PostMapping("/api/accounts/{accountId}/terminals/{terminalId}/operations/{type}")
 	@PublicServiceMethod
 	public ResponseEntity<TerminalModel> addTerminalOperationAction(@PathVariable long accountId, @PathVariable long terminalId, @PathVariable String type) {
 		accountRepository.findById(accountId).orElseThrow(() -> new AccountNotFoundException(accountId));
@@ -115,7 +115,7 @@ public class TerminalController extends BaseController {
 		return new ResponseEntity<>(terminalModelAssembler.toModel(terminal), HttpStatus.OK);
 	}
 
-	@DeleteMapping("/accounts/{accountId}/terminals/{terminalId}/operations/{type}")
+	@DeleteMapping("/api/accounts/{accountId}/terminals/{terminalId}/operations/{type}")
 	@PublicServiceMethod
 	public void delTerminalOperationAction(@PathVariable long accountId, @PathVariable long terminalId, @PathVariable String type) {
 		accountRepository.findById(accountId).orElseThrow(() -> new AccountNotFoundException(accountId));

@@ -2,6 +2,7 @@ package org.openpos.tms.application;
 
 import org.apache.tomcat.util.net.openssl.ciphers.Protocol;
 import org.openpos.tms.controller.TerminalController;
+import org.openpos.tms.controller.handler.AbstractTransactionHandler;
 import org.openpos.tms.dao.TerminalRepository;
 import org.openpos.tms.dao.dataobject.Terminal;
 import org.openpos.tms.infra.audit.PublicServiceAuditAspect;
@@ -18,7 +19,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @SpringBootApplication(exclude = SecurityAutoConfiguration.class) // TODO remove to enable security
 @EnableJpaRepositories("org.openpos.tms.dao")
 @ComponentScan(basePackageClasses = { TerminalController.class, TMSApplication.class, TerminalRepository.class,
-		PublicServiceAuditAspect.class, PKUtils.class, AccountModel.class, DefaultProtocol.class, Protocol.class })
+		PublicServiceAuditAspect.class, PKUtils.class, AccountModel.class, DefaultProtocol.class, Protocol.class,
+		AbstractTransactionHandler.class })
 @EntityScan(basePackageClasses = Terminal.class)
 public class TMSApplication {
 

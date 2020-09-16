@@ -37,7 +37,7 @@ public class Transaction extends BaseDataObject {
 	private Currency currency;
 	
 	@OneToMany
-	@JoinColumn(referencedColumnName = "transaction_id")
+	@JoinColumn(name = "transaction_id")
 	private List<Message> messages = new ArrayList<>();
 	
 }

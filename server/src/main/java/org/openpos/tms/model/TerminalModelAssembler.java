@@ -9,6 +9,7 @@ import org.openpos.tms.dao.dataobject.Address;
 import org.openpos.tms.dao.dataobject.Country;
 import org.openpos.tms.dao.dataobject.Operation;
 import org.openpos.tms.dao.dataobject.Terminal;
+import org.springframework.beans.BeanUtils;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 
@@ -27,16 +28,20 @@ public class TerminalModelAssembler extends RepresentationModelAssemblerSupport<
 		terminalModel
 				.add(linkTo(methodOn(TerminalController.class).getTerminal(account.getId(), entity.getTerminalId()))
 						.withSelfRel());
+		terminalModel.add(
+				linkTo(methodOn(TerminalController.class).getTerminals(account.getId(), null)).withRel("collection"));
 
+		BeanUtils.copyProperties(entity, terminalModel);
 		terminalModel.setId(entity.getTerminalId());
-		terminalModel.setActiveFrom(entity.getActiveFrom());
-		terminalModel.setActiveTo(entity.getActiveTo());
+//		terminalModel.setActiveFrom(entity.getActiveFrom());
+//		terminalModel.setActiveTo(entity.getActiveTo());
 
 		Address address = entity.getAddress();
 		if (address != null) {
-			terminalModel.setCity(address.getCity());
-			terminalModel.setLine1(address.getLine1());
-			terminalModel.setLine2(address.getLine2());
+			BeanUtils.copyProperties(address, terminalModel, "country");
+//			terminalModel.setCity(address.getCity());
+//			terminalModel.setLine1(address.getLine1());
+//			terminalModel.setLine2(address.getLine2());
 			Country country = address.getCountry();
 			if (country != null)
 				terminalModel.setCountry(country.getAlpha2());

@@ -1,5 +1,7 @@
 package org.openpos.tms.infra;
 
+import org.apache.commons.lang3.StringUtils;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -15,6 +17,11 @@ public class Utils {
 			sb.append(String.format("%02X", b));
 
 		return sb.toString();
-
+	}
+	
+	public static String maskPan(String pan) {
+		if (pan == null)
+			return pan;
+		return StringUtils.abbreviateMiddle(pan, "*", 10);
 	}
 }

@@ -22,6 +22,7 @@ public class AccountModelAssembler
 		AccountModel accountModel = instantiateModel(entity);
 		
 		accountModel.add(linkTo(methodOn(AccountController.class).getAccountById(entity.getId())).withSelfRel());
+		accountModel.add(linkTo(methodOn(AccountController.class).getAllAccounts(null)).withRel("collection"));
 		accountModel.add(linkTo(methodOn(TerminalController.class).getTerminals(entity.getId(), null)).withRel("terminals"));
 		
 		accountModel.setId(entity.getId());
