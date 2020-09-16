@@ -39,6 +39,7 @@ public class PersistingTransactionHandler extends POSTransactionHandler {
 		transactionDO.setCurrency(currency);
 		transactionDO.setTerminal(terminal);
 		transactionDO = transactionRepository.save(transactionDO);
+		
 		long transactionId = transactionDO.getId();
 		posMessage.setTransactionId(transactionId);
 		
